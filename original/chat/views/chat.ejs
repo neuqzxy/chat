@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>chat</title>
+    <script src="javascripts/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="javascripts/main.js"></script>
+    <style>
+        html,body {
+            background: #ccc;
+            padding: 20px 0 20px 0;
+        }
+        h1 {
+            text-align: center;
+        }
+        .login {
+            text-align: center;
+        }
+        .chatinput {
+            display: block;
+            width: 100%;
+            position: absolute;
+            min-height: 30px;
+            bottom: 0;
+        }
+        #content {
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div id="loginbox">
+    <h1>登录</h1>
+    <hr>
+    <div class="login">
+        <lable>用户名：</lable><input type="text" id="name"><br><br>
+        <input type="button" value="登录" id="loginbutton">
+    </div>
+</div>
+<div style="display: none;" id="chatbox">
+    <div id="content"></div>
+    <input type="text" placeholder="saying somgthing" class="chatinput" id="chatinput">
+</div>
+</body>
+</html>

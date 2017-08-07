@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>chat</title>
+    <script src="javascripts/jquery.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="stylesheets/bootstrap.css">
+    <script src="javascripts/bootstrap.js"></script>
+    <script src="javascripts/main.js"></script>
+    <script src="http://at.alicdn.com/t/font_o86wdrgtu766r.js"></script>
+    <style type="text/css">
+        .icon {
+            width: 1em; height: 1em;
+            vertical-align: -0.15em;
+            fill: currentColor;
+            overflow: hidden;
+        }
+    </style>
+    <style>
+        .sender {
+            clear: both
+        }
+
+        .sender div:nth-of-type(1) {
+            float: left
+        }
+
+        .sender div:nth-of-type(2) {
+            background-color: #7fffd4;
+            float: left;
+            margin: 0 20px 10px 15px;
+            padding: 10px 10px 10px 0;
+            border-radius: 7px
+        }
+
+        .receiver div:first-child img,
+        .sender div:first-child img {
+            width: 50px;
+            height: 50px
+        }
+
+        .receiver {
+            clear: both
+        }
+
+        .receiver div:nth-child(1) {
+            float: right
+        }
+
+        .receiver div:nth-of-type(2) {
+            float: right;
+            background-color: gold;
+            margin: 0 10px 10px 20px;
+            padding: 10px 0 10px 10px;
+            border-radius: 7px
+        }
+
+        .left_triangle {
+            height: 0;
+            width: 0;
+            border-width: 8px;
+            border-style: solid;
+            border-color: transparent #7fffd4 transparent transparent;
+            position: relative;
+            left: -16px;
+            top: 3px
+        }
+
+        .right_triangle {
+            height: 0;
+            width: 0;
+            border-width: 8px;
+            border-style: solid;
+            border-color: transparent transparent transparent gold;
+            position: relative;
+            right: -16px;
+            top: 3px
+        }
+    </style>
+    <style>
+        html,body {
+            background: #ccc;
+            padding: 10px 0 20px 0;
+            height: 100%;
+        }
+        h1 {
+            text-align: center;
+        }
+        .login {
+            text-align: center;
+        }
+        #chatbox {
+            height: 100%;
+        }
+        #inputgrop {
+            display: block;
+            width: 100%;
+            position: absolute;
+            min-height: 40px;
+            bottom: 0;
+        }
+        #content {
+            width: 100%;
+            overflow-y:auto;
+        }
+        .alert {
+            z-index: 100;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+        #usergroup {
+            margin-top: 20px;
+        }
+        .list-group {
+            overflow-y:auto;
+        }
+        .chatwindow {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="loginbox">
+    <h1>登录</h1><i style="text-indent: 10px;" class="icon iconfont icon-photo_camera__easyiconnet"></i>
+    <hr>
+    <div class="login">
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="exampleInputName2">用户名</label>
+                <input type="text" class="form-control" id="name" placeholder="请输入用户名">
+            </div>
+            <!--<lable>用户名：</lable><input type="text" id="name">-->
+            <br><br>
+            <!--<input type="button" value="登录" id="loginbutton">-->
+            <button type="button" class="btn btn-info btn-lg" id="loginbutton" onclick="return false;">登录</button>
+        </div>
+    </div>
+</div>
+
+<div style="display: none;" id="chatbox" >
+    <div id="usergroup" class="col-md-2">
+        <span  class="label label-primary" style="font-size: 2em;">在线成员</span>
+        <div class="list-group">
+
+        </div>
+    </div>
+
+    <div class="col-md-9 chatwindow col-md-offset-1">
+        <div class="alert alert-info alert-dismissible fade in" role="alert" id="myalert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="alert alert-info alert-dismissible fade in" role="alert" id="myalert1">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span></span>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade in" role="alert" id="myalert2">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span></span>
+        </div>
+        <div id="content"></div>
+        <div id="inputgrop">
+            <div class="col-md-10">
+                <input type="text" placeholder="saying somgthing" class="form-control chatinput" id="chatinput">
+            </div>
+            <form action="" style="display: none;" id="resetform"><input type="file" style="display: none" id="imginput"></form>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary" id="imgbutton">发送图片</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发送模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        模态框（Modal）标题
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" placeholder="say something" class="form-control chatinput" id="inputtoone">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="closesendtoo">关闭
+                    </button>
+                    <button type="button" class="btn btn-primary" id="sendtoo">
+                        发送
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+    <!-- 收到模态框（Modal） -->
+    <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel1">
+                        模态框（Modal）标题
+                    </h4>
+                </div>
+                <div class="modal-body shoudao">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" id="closesendtoo">
+                        知道了
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+    <button id="showmodal" data-toggle="modal" data-target="#myModal1" style="display: none;"></button>
+</div>
+</body>
+</html>
