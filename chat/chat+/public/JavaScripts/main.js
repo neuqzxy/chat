@@ -144,6 +144,8 @@ $(function(){
 
     _$imgInput.change(function (event) {
         sendImg(event);
+        //重置一下form元素，否则如果发同一张图片不会触发change事件
+        $("#resetform")[0].reset();
     });
 
 
