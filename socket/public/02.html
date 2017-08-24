@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>socket.io</title>
+</head>
+<body>
+<div style="float: left; width: 30%">
+    <button onclick="group1()">Group1</button>
+    <button onclick="group2()">Group2</button>
+    <hr>
+    群聊<input type="text" id="msginput">
+    <button id="sendmsg">发送</button>
+</div>
+<div style="float: left; width: 65%" id="chatbox">
+
+</div>
+</body>
+<script src="js/sea.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let group1 = () => {
+        console.log('一组');
+        seajs.use(['./js/group1.js'], (socket) => {
+            chat(socket);
+        })
+    };
+
+    let group2 = () => {
+        console.log('二组');
+        seajs.use(['./js/group2.js'], (socket) => {
+            chat(socket);
+        })
+    };
+
+    /**
+     * 下面写两个分组的共同的方法
+     */
+    let chat = (socket) => {
+        let btn = document.getElementById('sendmsg');
+        let msgInput = document.getElementById('msginput');
+        btn.addEventListener('click', () => {
+            let msg = msgInput.value;
+            let data = {msg: msg};
+            socket.emit('sendMsg', data);
+        });
+        socket.on('receiveMsg', (data) => {
+            let chatBox = document.getElementById('chatbox');
+            let div = document.createElement('div');
+            div.innerHTML = `${data.id}: ${data.msg}`;
+            chatBox.appendChild(div);
+        })
+    }
+</script>
+</html>

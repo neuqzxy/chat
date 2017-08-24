@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div style="float: left; width: 30%">
+    <button onclick="group1()">Group1</button>
+    <button onclick="group2()">Group2</button>
+    <hr>
+    群聊<input type="text" id="msginput">
+    <button id="sendmsg">发送</button>
+    <button id="sendtoourgroup">发给本组用户</button>
+</div>
+<div style="float: left; width: 65%" id="chatbox">
+</div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let socket = io.connect('http://localhost:3000');
+    let group1 = () => {
+        socket.emit('addgroup1');
+    };
+    let group2 = () => {
+        socket.emit('addgroup2');
+    };
+    let btn = document.getElementById('sendmsg');
+    let msgInput = document.getElementById('msginput');
+    btn.addEventListener('click', () => {
+        let msg = msgInput.value;
+        let data = {msg: msg};
+        socket.emit('sendMsg', data);
+    });
+    socket.on('receiveMsg', (data) => {
+        let chatBox = document.getElementById('chatbox');
+        let div = document.createElement('div');
+        div.innerHTML = `${data.id}: ${data.msg}`;
+        chatBox.appendChild(div);
+    });
+    let btn2 = document.getElementById('sendtoourgroup');
+    btn2.addEventListener('click', () => {
+        let msg = msgInput.value;
+        let data = {msg: msg};
+        socket.emit('sendToOurGroup', data);
+    })
+</script>
+</html>

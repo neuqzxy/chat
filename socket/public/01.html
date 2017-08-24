@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>群聊</title>
+</head>
+<body>
+<h1>群聊</h1>
+<div style="width: 30%; float: left">
+    输入:<input type="text" id="msginput">
+    <button id="msgbtn">发送</button>
+    <hr>
+    <input type="file" id="tupian">
+    <button onclick="sendImg()">发送图片</button>
+    <button onclick="sendImg1()">ajax</button>
+</div>
+<div style="width: 65%; float: right" id="showbox">
+
+</div>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let socket = io.connect('http://localhost:3000');
+    let btn = document.getElementById('msgbtn');
+    let msginput = document.getElementById('msginput');
+    let showbox = document.getElementById('showbox');
+    btn.addEventListener('click', (event) => {
+        let msg = msginput.value;
+        let data = {msg: msg};
+        socket.emit('sendMessage', data);
+    });
+    socket.on('receiveMessage', (data) => {
+        console.log('收到');
+        let message = document.createElement('div');
+        message.innerHTML = `${data.id}: ${data.msg}`;
+        showbox.appendChild(message);
+    });
+    let sendImg = () => {
+        let Imginput = document.getElementById('tupian');
+        let file = Imginput.files[0];       //得到该图片
+        console.log(file.name);
+        let reader = new FileReader();      //创建一个FileReader对象，进行下一步的操作
+        reader.readAsDataURL(file);              //通过readAsDataURL读取图片
+
+        reader.onload =function () {            //读取完毕会自动触发，读取结果保存在result中
+            let data = {img: this.result};
+            socket.emit('sendImg', data);
+        }
+    };
+    socket.on('receiveImg', (data) => {
+        let ImgDIV = document.createElement('div');
+        ImgDIV.innerHTML = `<div>${data.id}: <img src="${data.img}" /></div>`;
+        showbox.appendChild(ImgDIV);
+    });
+    socket.on('receiveAjaxImgSend', (data) => {
+        let ImgDIV = document.createElement('div');
+        ImgDIV.innerHTML = `<div>${data.id}: <img src="${data.imgUrl}" /></div>`;
+        showbox.appendChild(ImgDIV);
+    });
+
+    let sendImg1 = () => {
+        let formData = new FormData();
+        let Imginput = document.getElementById('tupian');
+        let file = Imginput.files[0];
+        formData.append(file.name, file);
+        //ajax
+        let xhr = new XMLHttpRequest();
+        xhr.timeout = 200;
+        xhr.open('POST', '/sendimg', true);
+        xhr.send(formData);
+        xhr.onreadystatechange = () => {
+            if(xhr.readyState === 4) {
+                if((xhr.status >= 200 && xhr.status < 300) || (xhr.status === 304)) {
+                    console.log('success');
+                    let data = {imgName: xhr.responseText};
+                    socket.emit('ajaxImgSendSuccess', data);
+                }
+                else {
+                    console.log(xhr.readyState,xhr.status)
+                }
+            } else {
+                console.log(xhr.readyState);
+            }
+        };
+        xhr.ontimeout = function(event){
+            alert('请求超时！');
+        }
+    }
+</script>
+
+</html>
